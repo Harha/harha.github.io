@@ -45,7 +45,7 @@ Avoin kuviodata
           <TextSymbolizer>
             <Geometry>
               <ogc:Function name="centroid">
-                <ogc:PropertyName>geometry</ogc:PropertyName>
+                <ogc:PropertyName>geom</ogc:PropertyName>
               </ogc:Function>
             </Geometry>
             <Label>
