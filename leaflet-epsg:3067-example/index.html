@@ -61,8 +61,8 @@
         });
 
         // init wms overlay layers
-        var layer_avoinkuviodata = L.tileLayer.wms('http://localhost:8080/geoserver/avoinkuviodata/wms', {
-            layers: 'avoinkuviodata',
+        var layer_avoinkuviodata = L.tileLayer.wms('http://harha.us.to:5050/geoserver/avoinkuviodata/wms', {
+            layers: 'avoinkuviodata:stand',
             format: 'image/png',
             transparent: true,
             minZoom: 3,
@@ -96,8 +96,9 @@
         // init map view
         map.setView([65.01275, 25.46815], 3);
 
+	// this is disabled by default, just an ugly example!
         // add test geojson polygon(s)
-        var geojson = {
+        /*var geojson = {
             type: 'Feature',
             geometry: {
                 type: 'Polygon',
@@ -134,7 +135,7 @@
         var layer_geojson = L.Proj.geoJson(geojson).addTo(map);
 
         // zoom to our polygon(s)
-        map.fitBounds(layer_geojson.getBounds());
+        map.fitBounds(layer_geojson.getBounds());*/
     </script>
 </body>
 </html>
