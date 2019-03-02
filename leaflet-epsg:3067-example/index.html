@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="./lib/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="./lib/L.Control.ZoomBox.css" />
     <style>
         html, body {
             height: 100%;
@@ -21,6 +22,7 @@
     <script src="./lib/leaflet/leaflet.js"></script>
     <script src="./lib/proj4-compressed.js"></script>
     <script src="./lib/proj4leaflet.js"></script>
+    <script src="./lib/L.Control.ZoomBox.min.js"></script>
     <script>
         // setup projection for WMS
         var crs = new L.Proj.CRS('EPSG:3067',
@@ -33,40 +35,94 @@
         // setup projection for GeoJSON
         proj4.defs('EPSG:3067', '+proj=utm +zone=35 +ellps=GRS80 +units=m +towgs84=0,0,0,-0,-0,-0,0 +no_defs');
 
+        // init wms base layers
+        var layer_peruskartta = L.tileLayer.wms('http://tiles.kartat.kapsi.fi/peruskartta', {
+            layers: 'peruskartta',
+            format: 'image/jpeg',
+            minZoom: 3,
+            maxZoom: 15,
+            attribution: 'MML'
+        });
+
+        var layer_taustakartta = L.tileLayer.wms('http://tiles.kartat.kapsi.fi/taustakartta', {
+            layers: 'taustakartta',
+            format: 'image/jpeg',
+            minZoom: 3,
+            maxZoom: 15,
+            attribution: 'MML'
+        });
+
+        var layer_ortokuva = L.tileLayer.wms('http://tiles.kartat.kapsi.fi/ortokuva', {
+            layers: 'ortokuva',
+            format: 'image/jpeg',
+            minZoom: 3,
+            maxZoom: 15,
+            attribution: 'MML'
+        });
+
+        // init wms overlay layers
+        var layer_avoinkuviodata = L.tileLayer.wms('http://localhost:8080/geoserver/avoinkuviodata/wms', {
+            layers: 'avoinkuviodata',
+            format: 'image/png',
+            transparent: true,
+            minZoom: 3,
+            maxZoom: 15,
+            attribution: 'Metsäkeskus'
+        });
+
         // init map object
         var map = new L.Map('map', {
             crs: crs,
             continuousWorld: true,
-            worldCopyJump: false
+            worldCopyJump: false,
+            layers: [layer_peruskartta, layer_avoinkuviodata]
         });
 
-        // add wms layer
-        var layer_wms = L.tileLayer.wms('http://tiles.kartat.kapsi.fi/peruskartta', {
-            layers: 'peruskartta',
-            format: 'image/jpeg',
-            minZoon: 0,
-            maxZoom: 14,
-            attribution: 'MML'
+        // add layer controls (base layers, overlay layers)
+        L.control.layers({
+            layer_peruskartta,
+            layer_taustakartta,
+            layer_ortokuva
+        }, {
+            layer_avoinkuviodata
+        }).addTo(map);
+
+        // add box zoom control
+        L.control.zoomBox({
+            modal: true,
+            title: 'Zoom to box'
         }).addTo(map);
 
         // init map view
-        map.setView([65.01275, 25.46815], 11);
+        map.setView([65.01275, 25.46815], 3);
 
         // add test geojson polygon(s)
         var geojson = {
             type: 'Feature',
             geometry: {
                 type: 'Polygon',
-                coordinates: [[
-                    [393960.156, 6801453.126],
-                    [394798.608, 6801657.878],
-                    [394930.512, 6801670.111],
-                    [395028.723, 6802116.858],
-                    [394258.945, 6801929.148],
-                    [394261.711, 6801810.541],
-                    [394091.166, 6801665.961],
-                    [393960.156, 6801453.126]
-                ]]
+                coordinates: [
+                    [
+                        [393960.156, 6801453.126],
+                        [394798.608, 6801657.878],
+                        [394930.512, 6801670.111],
+                        [395028.723, 6802116.858],
+                        [394258.945, 6801929.148],
+                        [394261.711, 6801810.541],
+                        [394091.166, 6801665.961],
+                        [393960.156, 6801453.126]
+                    ],
+                    [
+                        [394960.156, 6802453.126],
+                        [395798.608, 6802657.878],
+                        [395930.512, 6802670.111],
+                        [396028.723, 6803116.858],
+                        [395258.945, 6802929.148],
+                        [395261.711, 6802810.541],
+                        [395091.166, 6802665.961],
+                        [394960.156, 6802453.126]
+                    ]
+                ]
             },
             crs: {
                 type: 'name',
@@ -75,7 +131,6 @@
                 }
             }
         };
-
         var layer_geojson = L.Proj.geoJson(geojson).addTo(map);
 
         // zoom to our polygon(s)
